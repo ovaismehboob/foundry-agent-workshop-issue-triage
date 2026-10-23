@@ -123,6 +123,18 @@ if ($StudentsCsv) {
     }
 }
 
+# Search service identity: its Cognitive Services User assignment on the Foundry resource would be left orphaned.
+$searchMi = Invoke-Az -AllowFail -AzArgs @('search', 'service', 'show', '--name', $SearchServiceName, '--resource-group', $ResourceGroup,
+    '--subscription', $SubscriptionId, '--query', 'identity.principalId', '-o', 'tsv')
+if ($searchMi.ExitCode -eq 0 -and $searchMi.Output.Trim()) {
+    $miId = $searchMi.Output.Trim().ToLower()
+    foreach ($assignment in @(Get-AzJson -AzArgs @('role', 'assignment', 'list', '--scope', $accountId, '--subscription', $SubscriptionId) -AllowFail)) {
+        if ($assignment.scope -ieq $accountId -and $assignment.principalId -and $assignment.principalId.ToLower() -eq $miId) {
+            $assignmentsToRemove += [pscustomobject]@{ Id = $assignment.id; Text = "$($assignment.roleDefinitionName) for search service '$SearchServiceName' on the Foundry resource" }
+        }
+    }
+}
+
 Write-Host ''
 Write-Host 'The following will be removed:' -ForegroundColor Yellow
 $targets | ForEach-Object { Write-Host "  resource: $($_.Label)" }
