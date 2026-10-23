@@ -3,6 +3,11 @@
 ## Objective
 Ground the Prompt Agent in Contoso Telecom knowledge: put the synthetic documents into a **Foundry IQ knowledge base**, connect it to `issue-triage-agent`, and compare grounded and ungrounded answers. This is the "link an issue to an existing solution" use case.
 
+> **Workshop quick path (do this, skip that)**
+> - **Do:** 4.3 connect to the shared search service, 4.4 create **your** knowledge base with **option B (File upload)**, 4.5 connect it to your agent, 4.6 test.
+> - **Names:** use the ones in your handout, for example `kbtriage-s01` and `kstriage-s01`.
+> - **Skip:** creating a search service (4.1), checking roles (4.2), and option A (storage account). They are already done or not needed.
+
 ## Prerequisites
 - Module 1 completed.
 - Roles listed in [prerequisites.md](../prerequisites.md#roles) for Module 4 (your instructor may assign them before class). In an instructor-led workshop they are already assigned.
@@ -40,36 +45,53 @@ The [knowledge](../../knowledge) folder contains seven short Markdown documents 
 
 ## Steps
 
-> **Instructor-led workshop (shared environment):** your instructor already created one shared Azure AI Search service, assigned your roles, and gave you a handout with the values to use. In that case:
-> - **Skip 4.1 and 4.2.** Use the search service named in your handout; don't create Azure resources or assign roles.
-> - In 4.4, use **option B (File upload)** and the names in your handout, for example knowledge base `kbtriage-s01` and knowledge source `kstriage-s01`. Everyone shares the same search service, so **never use another student's names and never delete or edit objects that aren't yours**.
-> - Wherever this module or later modules say `kbtriage` or `kstriageknowledge`, use your own names.
-> - In your handout's `.env.txt`, `AZURE_SEARCH_KNOWLEDGE_BASE_NAME` already holds your knowledge base name.
+> **Which path are you on?**
+> - **Instructor-led workshop (shared environment):** your instructor already created one shared Azure AI Search service, the embedding deployment and your roles, and gave you a handout (`<student>.env.txt`) with your values. You **don't create Azure resources or assign roles**. Follow the steps as written, use the names in your handout (for example knowledge base `kbtriage-s01` and knowledge source `kstriage-s01`), and use **option B (File upload)** in 4.4.
+> - **Self-paced, in your own subscription:** open the "Self-paced only" sections to create the search service (4.1) and, optionally, the storage account (4.4 option A).
+>
+> Everyone in a workshop shares the same search service, so **never use another student's names and never delete or edit objects that aren't yours**. Wherever this module or later modules say `kbtriage` or `kstriageknowledge`, use your own names.
 
-### 4.1 Create the Azure AI Search service
+### 4.1 Find your search service
+**Instructor-led workshop:** open your handout and note these values:
+
+| Handout value | Example | Used for |
+|---|---|---|
+| Search endpoint (`AZURE_SEARCH_ENDPOINT`) | `https://<shared-search-service>.search.windows.net` | Module 5 and the portal connection in 4.3 |
+| Knowledge base name (`AZURE_SEARCH_KNOWLEDGE_BASE_NAME`) | `kbtriage-s01` | 4.4, 4.5, Modules 5 and 7 |
+| Knowledge source name | `kstriage-s01` | 4.4 |
+| Embedding model | `text-embedding-3-small` | 4.4 |
+
+Nothing to create in the Azure portal. If something later says "forbidden", wait a few minutes (role assignments take time to apply) and then tell your instructor which step failed.
+
+<details><summary>Self-paced only: create the Azure AI Search service yourself</summary>
+
 1. In the [Azure portal](https://portal.azure.com), create an **Azure AI Search** service in your lab resource group, in the same region as your Foundry project:
    - **Service name**: for example `srchtriagelab<initials>` (lowercase letters and numbers; no hyphens)
-   - **Pricing tier**: **Free** if available, otherwise **Basic**. A subscription can have only one Free search service; if one already exists, use Basic (billed while it exists).
+   - **Pricing tier**: **Free** if available, otherwise **Basic**. A subscription can have only one Free search service; if one already exists, use Basic (billed while it exists). Basic or higher is needed for the managed identity used in 4.2.
 2. Under **Settings** > **Identity**, turn **System assigned** managed identity **On**.
 3. Under **Settings** > **Keys**, set **API access control** to **Both** (or **Role-based access control**).
 4. Copy the **Url** from the **Overview** page (for example `https://srchtriagelabab.search.windows.net`) into your private notes.
 
 > Some regions show "high demand" and don't accept new search services. The [search region list](https://learn.microsoft.com/azure/search/search-region-support) marks them; your instructor picks a region that works.
 
+</details>
+
 ### 4.2 Check the role assignments
-Your instructor assigns these, scoped to the lab resources only (see [instructor-guide.md](../instructor-guide.md#role-checklist)):
+**Instructor-led workshop:** your instructor has already assigned all of these, scoped to the lab resources only. There is nothing for you to do; this table explains why access works.
+
+**Self-paced:** the table lists what must be assigned (see [instructor-guide.md](../instructor-guide.md#role-checklist)).
 
 | Principal | Role | On |
 |---|---|---|
 | Foundry **project** managed identity | Search Index Data Reader, Search Index Data Contributor, Search Service Contributor | Search service |
-| Your user | Search Service Contributor, Search Index Data Contributor | Search service |
+| Your user | Search Service Contributor, Search Index Data Contributor, Search Index Data Reader | Search service |
 | **Search service** managed identity | Cognitive Services User | Foundry resource (the knowledge base calls your embedding and chat models) |
 | **Search service** managed identity (option A only) | Storage Blob Data Reader | Storage account |
 
 > When API-key authentication is disabled on the Foundry resource (common in enterprise tenants), the portal shows: "The search service will use managed identity to authenticate. Ensure the search service's managed identity has the Cognitive Services User role on this resource."
 
 ### 4.3 Connect the project to the search service
-1. Make sure your project has an embedding deployment. If not, deploy `text-embedding-3-small` from **Discover** > **Models**.
+1. Make sure your project has an embedding deployment (in a workshop, `text-embedding-3-small` is already deployed; if it's missing from the list, tell your instructor). Self-paced: deploy `text-embedding-3-small` from **Discover** > **Models**.
 2. In the [Foundry portal](https://ai.azure.com), select **Build** > **Knowledge**.
 3. In **Foundry IQ resource**, select your search service. In **Auth Type**, select **Project Managed Identity** (keyless). Select **Connect**.
    > **API Key** is also offered. Prefer **Project Managed Identity**; it needs no stored secret.
@@ -81,9 +103,11 @@ Your instructor assigns these, scoped to the lab resources only (see [instructor
    - **Chat completions model**: your chat deployment (for example `gpt-5-mini`)
    - **Retrieval reasoning effort**: **Minimal** (default)
    - **Output mode**: **Extractive data** (default)
-2. Under **Knowledge sources (Foundry IQ)**, add the documents with **one** of the options below.
+2. Under **Knowledge sources (Foundry IQ)**, add the documents with **one** of the options below. **In an instructor-led workshop, use option B.**
 
-#### Option A - Azure Blob Storage (official lab path)
+#### Option A - Azure Blob Storage (self-paced only; not used in an instructor-led workshop)
+> In a workshop no storage account is provided, and you can't create one. Skip to option B.
+
 1. In the Azure portal, create a storage account in the lab resource group (**Standard**, **LRS**, same region), create a container `triageknowledge`, and upload the seven files. Keep anonymous access disabled.
 
    > **Naming:** storage account names must be **3-24 lowercase letters and numbers only** — no hyphens (for example `sttriagelab<initials>`). Blob container names allow hyphens, but this lab keeps them hyphen-free for consistency.
@@ -91,7 +115,7 @@ Your instructor assigns these, scoped to the lab resources only (see [instructor
 
 > **Tenant policy note:** many enterprise tenants enforce **Public network access: Disabled** and **shared key access disabled** on storage accounts. Then neither you nor Azure AI Search can reach the account without private networking, and option A fails. In the validation tenant for this lab, the policy reverted any change, so option B was used.
 
-#### Option B - File upload (preview, no storage account) - validated
+#### Option B - File upload (preview, no storage account) - validated; use this in a workshop
 1. Select **Upload files** and choose the seven files from the `knowledge` folder.
 2. The **Create a knowledge source** dialog shows **File (Preview)**: "Upload files directly — no storage account or connection string needed. Service-managed processing." Set **Name** `kstriageknowledge` (shared workshop: `kstriage-<id>` from your handout), a **Description**, and the **Embedding model** (`text-embedding-3-small`), then select **Create**.
 

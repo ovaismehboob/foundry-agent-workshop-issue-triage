@@ -30,6 +30,31 @@ All data is synthetic. Contoso Telecom, its customers, areas, and incidents are 
 
 Before you start, complete [prerequisites.md](prerequisites.md). If something goes wrong, see [troubleshooting.md](troubleshooting.md). At the end, follow [cost-and-cleanup.md](cost-and-cleanup.md).
 
+## Workshop day at a glance (instructor-led)
+
+If your instructor gave you an account and a **handout**, this is your path. Everything shared (search service, container registry, monitoring, model deployments, guardrail) is **already created for you**. You don't create Azure resources or assign roles.
+
+**What you receive:** (1) your lab account and a **Temporary Access Pass** (a one-time sign-in code that replaces your password), and (2) a handout file `<your-id>.env.txt` with your project endpoint, the shared search endpoint, and **your own names** (for example `kbtriage-s01`).
+
+**Signing in:** open a private browser window, go to [ai.azure.com](https://ai.azure.com), sign in with your lab account, and enter the Temporary Access Pass when asked. Open **your own project** (the name your instructor gave you). If the pass expires, ask your instructor for a new one.
+
+| Module | You do | Already done for you / skip |
+|---|---|---|
+| 1 | Create the Prompt Agent in your project | - |
+| 2 | Set up Python and run the rules-based app | - |
+| 3 | Copy the lines from your handout into `app/.env`, then do the exercises | Nothing to look up in the portal: the handout has your endpoint |
+| 4 | Create **your** knowledge source and knowledge base on the shared search service (**File upload**), connect it to your agent | Search service, roles, embedding model. **Skip** creating a search service or storage account |
+| 5 | Put your search endpoint and knowledge base name in `app/.env`, enable step 5.1, run the tests | Search roles |
+| 6 | Build and run the container (needs Docker) | - |
+| 7 | `azd ai agent init` (pick the **existing** registry), `azd deploy`, invoke your agent | Registry and its access. **Never** create a new registry. **Don't** run the role script: send your agent's principal ID to the instructor |
+| 8 | Assign the instructor's guardrail to your agent, test it, connect the shared Application Insights, read traces | Guardrail, Application Insights. **Skip** creating a guardrail or Application Insights |
+| 9 | Upload your dataset, run the evaluation, change the instructions, compare | Judge model: use the one your instructor names |
+
+**Three rules for a shared workshop**
+1. Use only **your own** names (project, `kbtriage-<id>`, `kstriage-<id>`). Other students' objects are visible on the shared search service; leave them alone.
+2. If you see "forbidden" or "authorization failed", wait about five minutes (permissions take time to apply), then tell your instructor which step failed.
+3. Never paste your Temporary Access Pass, keys, or tokens into code, chat, or screenshots.
+
 ## Get the lab files
 
 ```powershell

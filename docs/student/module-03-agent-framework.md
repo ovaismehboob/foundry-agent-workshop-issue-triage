@@ -3,6 +3,11 @@
 ## Objective
 Turn the rules-based app into an AI agent, one small step at a time: connect to Foundry, add instructions and structured output, expose application functions as tools, keep conversation context, and add safe failure handling.
 
+> **Workshop quick path**
+> 1. Open your handout `<your-id>.env.txt`.
+> 2. In step 1 below, after `Copy-Item .env.example .env`, paste the four lines `FOUNDRY_PROJECT_ENDPOINT`, `MICROSOFT_FOUNDRY_MODEL_DEPLOYMENT_NAME`, `PROMPT_AGENT_NAME` and `PROMPT_AGENT_VERSION` into `app/.env`. Set `PROMPT_AGENT_VERSION` to the version number your own Prompt Agent shows in the portal.
+> 3. Leave the Module 5 lines for later.
+
 ## Prerequisites
 - Modules 1 and 2 completed. You have the project endpoint, model deployment name, and Prompt Agent name and version.
 - **Foundry User** role on the Foundry project (see [prerequisites.md](../prerequisites.md#roles)).

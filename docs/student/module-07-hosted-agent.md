@@ -9,6 +9,11 @@ Deploy the same Agent Framework triage agent to **Foundry Agent Service** as a *
 - Hosted agents are available in a [documented list of regions](https://learn.microsoft.com/azure/foundry/agents/concepts/hosted-agents#region-availability) (including UAE North at the time of writing).
 - Container images must be **linux/amd64**; the container serves port **8088**; the platform provides `/readiness` routing, a dedicated Microsoft Entra **agent identity**, and a dedicated endpoint.
 
+> **Workshop quick path (do this, skip that)**
+> - **Do:** 7.1 check tools, 7.2 `azd ai agent init` (**pick the existing registry**), 7.3 add your knowledge base name, 7.5 `azd deploy`, 7.6 note your agent's principal ID, 7.8 invoke.
+> - **Send your instructor** the principal ID from 7.6 and your project name, then wait a few minutes (this replaces 7.7).
+> - **Skip:** creating a registry or resource group, and running `assign-hosted-agent-roles.ps1` (you don't have permission).
+
 ## Prerequisites
 - Module 3 completed (Module 5 optional). **Module 6 is optional** — `azd` builds the image remotely in Azure Container Registry, so you don't need a locally built image.
 - **Foundry Project Manager** role at project scope (needed to deploy hosted agents). See [prerequisites.md](../prerequisites.md#roles).
@@ -26,7 +31,7 @@ Deploy the same Agent Framework triage agent to **Foundry Agent Service** as a *
 `python scripts/lab_state.py status` shows 3.1a to 3.5b enabled (and 5.1 if you completed Module 5). If you did Module 6, the local container works; if you skipped it, that's fine — `azd` builds the image in Azure.
 
 ## Resources used
-Foundry project (existing), model deployment, Azure Container Registry (created or selected by `azd`), hosted agent compute (billed while sessions are active), optional search service.
+Foundry project (existing), model deployment, Azure Container Registry (created or selected by `azd`; in an instructor-led workshop, the shared registry your instructor provides), hosted agent compute (billed while sessions are active), optional search service (in a workshop, the shared one).
 
 ## Steps
 
@@ -109,6 +114,8 @@ azd provision -e triage-lab
 ```
 Validated: about 1-2 minutes; it creates the container registry and its project connection. Optional: `azd ai agent run` starts the agent locally with the `startupCommand` and opens the Agent Inspector; in a second terminal, `azd ai agent invoke --local "Triage issue ISS-1001"`. Stop it with **Ctrl+C**.
 
+> **Instructor-led workshop:** the registry already exists, so provisioning should only connect your project to it. If `azd` offers to create a new registry or resource group, stop and ask your instructor.
+
 ### 7.5 Deploy the hosted agent
 ```powershell
 azd deploy -e triage-lab
@@ -171,7 +178,9 @@ If `$agentPrincipalId` is empty, the agent isn't `active` yet - wait a minute an
 > - **Redact**: the project endpoint, resource IDs, and the `principal_id` GUID. See [docs/images/README.md](../images/README.md).
 
 ### 7.7 Grant the agent identity access to the knowledge base (Module 5 only)
-From the repository root, use the agent principal ID you captured in step 7.6 (either the `$agentPrincipalId` variable, or paste the GUID):
+> **Instructor-led workshop:** you can't assign roles, so **don't run the script below**. Send your instructor the agent principal ID you captured in step 7.6 (and your project name). The instructor runs the script for you; then wait a few minutes before step 7.8.
+
+Otherwise, from the repository root, use the agent principal ID you captured in step 7.6 (either the `$agentPrincipalId` variable, or paste the GUID):
 
 ```powershell
 ./deployment/assign-hosted-agent-roles.ps1 -AgentPrincipalId $agentPrincipalId `

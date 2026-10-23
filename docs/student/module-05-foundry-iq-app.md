@@ -3,6 +3,10 @@
 ## Objective
 Connect the code-defined agent to the `kbtriage` knowledge base you built in Module 4, so the app can link issues to known incidents and documented solutions, and show the source references the service returns.
 
+> **Workshop quick path**
+> 1. From your handout, paste `AZURE_SEARCH_ENDPOINT` and `AZURE_SEARCH_KNOWLEDGE_BASE_NAME` (your own, for example `kbtriage-s01`) into `app/.env`.
+> 2. Run the steps below as written. Nothing to create in Azure.
+
 ## Prerequisites
 - Modules 3 and 4 completed (`python scripts/lab_state.py status` shows 3.1a to 3.5b enabled).
 - Two roles on the search service for your user: **Search Index Data Reader** (retrieve from the knowledge base) and **Reader** (read the knowledge base definition, which the Agent Framework provider loads first). If you already have **Search Service Contributor** from Module 4, add only **Search Index Data Reader**. **API access control** on the search service must be **Both** or **Role-based access control**.

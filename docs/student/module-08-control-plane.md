@@ -3,6 +3,10 @@
 ## Objective
 Apply guardrails to the triage agent, test allowed and blocked behaviour, and review traces, metrics, logs, versions, connections, and access. Learn which controls belong to Foundry, Azure, the application, the model, Microsoft Entra, and optional products.
 
+> **Workshop quick path (do this, skip that)**
+> - **Do:** 8.1 assign the instructor's guardrail to **your** agent, 8.2 run the tests, 8.3 connect the shared Application Insights (`appi-triage-workshop`) and read your traces, 8.4 to 8.7 review.
+> - **Skip:** creating a guardrail (8.1 steps 2 to 4) and creating a new Application Insights resource. You can see other students' traces in the shared workspace; look only at your own.
+
 ## Prerequisites
 - Modules 1 and 4 completed (Module 7 optional).
 - **Foundry Account Owner** role (or higher) on the Foundry resource to create guardrails. If you don't have it, your instructor demonstrates 8.1 and you do the tests. In an instructor-led workshop on a shared Foundry resource, the instructor creates one guardrail (for example `grissuetriage`) and you assign it to **your own** agent (in the agent playground, **Guardrail (Preview)** section) instead of creating one.
@@ -21,11 +25,13 @@ Apply guardrails to the triage agent, test allowed and blocked behaviour, and re
 `issue-triage-agent` with the knowledge base (Module 4). Optional: `issue-triage-hosted` (Module 7).
 
 ## Resources used
-Foundry project, guardrails, Application Insights and its Log Analytics workspace (billed for ingested data).
+Foundry project, guardrails, Application Insights and its Log Analytics workspace (billed for ingested data; in an instructor-led workshop these are shared and created by your instructor).
 
 ## Steps
 
 ### 8.1 Create and assign a guardrail
+> **Instructor-led workshop:** your instructor creates **one** guardrail (for example `grissuetriage`) for the whole class, because creating guardrails needs rights on the shared Foundry resource. **Do only this:** select **Build** > **Guardrails** and look at the controls the instructor configured (the table below explains each one); then open `issue-triage-agent` and assign the guardrail to **your own agent** in the playground's **Guardrail (Preview)** section, and check the new **Version**. Skip the create wizard (steps 2 to 4). If you can't assign it, tell your instructor.
+
 1. In the Foundry portal, select **Build** > **Guardrails**. The page has tabs **Guardrails**, **Blocklists**, and **Integrations (Preview)**, and lists **Microsoft.DefaultV2** applied to your model deployments. That default guardrail is what blocked ISS-1012 in Module 1.
 2. Select **Create**. **Step 1: Add controls** lists the controls by category, each with a **Toggle control for ...** checkbox, intervention points, and an action. Some controls are on by default and can't be removed:
 
