@@ -26,7 +26,7 @@ All data is synthetic. No real customers, incidents, or credentials are included
 | 8 | [Govern and monitor with the Foundry control plane](docs/student/module-08-control-plane.md) | Portal |
 | 9 | [Evaluate the agent with a local dataset](docs/student/module-09-evaluation.md) | Portal + Python |
 
-Start with the [student guide](docs/student-guide.md). Instructors: read the [instructor guide](docs/instructor-guide.md) first.
+Start with the [student guide](docs/student-guide.md). Instructors: read the [instructor guide](docs/instructor-guide.md) first, and follow the [instructor runbook](docs/instructor-runbook.md) to onboard a class on shared infrastructure.
 
 ## Quick start (Module 2, no Azure needed)
 

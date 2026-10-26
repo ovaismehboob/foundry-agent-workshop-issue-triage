@@ -31,6 +31,8 @@ See [architecture.md](architecture.md). Key teaching idea: **one application, tw
 | **Shared infrastructure for a larger class** (one Foundry resource, one project per student, one shared search service, registry and Application Insights) | Lowest cost for about 20 students; students can't create resources or assign roles | Set up with [provision-workshop.ps1](../deployment/provision-workshop.ps1); see [Shared workshop infrastructure](#shared-workshop-infrastructure). |
 
 ### Shared workshop infrastructure
+**Start with the step-by-step [instructor runbook](instructor-runbook.md)** to onboard a class. This section explains what the scripts create and why.
+
 Use this when students must not create Azure resources or assign permissions. You keep the existing resource group, Foundry resource and one project per student, and the script adds only what is missing.
 
 | Shared resource | Notes |
