@@ -19,7 +19,7 @@ All data is synthetic. No real customers, incidents, or credentials are included
 | 1 | [Create a Prompt Agent in the Foundry portal](docs/student/module-01-prompt-agent-portal.md) | Portal |
 | 2 | [Build and run the basic Python application](docs/student/module-02-basic-app.md) | Python |
 | 3 | [Extend the app with Microsoft Agent Framework](docs/student/module-03-agent-framework.md) | Python |
-| 4 | [Configure Foundry IQ with Azure Storage](docs/student/module-04-foundry-iq-portal.md) | Portal |
+| 4 | [Configure Foundry IQ with Azure AI Search](docs/student/module-04-foundry-iq-portal.md) | Portal |
 | 5 | [Use Foundry IQ from the app](docs/student/module-05-foundry-iq-app.md) | Python |
 | 6 | [Containerize the application](docs/student/module-06-containerize.md) | Docker |
 | 7 | [Deploy as a hosted agent](docs/student/module-07-hosted-agent.md) | azd |

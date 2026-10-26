@@ -4,14 +4,14 @@
 Evaluate the triage agent with a small, human-readable synthetic dataset: review and validate it, run a portal agent evaluation, find weak cases, change the agent instructions, evaluate again, and compare the results.
 
 > **Workshop quick path**
-> - Use the judge model your instructor names in 9.5; don't deploy models yourself.
+> - In 9.5, select `gpt-5-mini` as the **Judge model**; it is already deployed. Don't deploy models yourself.
 > - Evaluations can take a long time and use shared model capacity. Start yours when your instructor says, then continue with 9.6 locally while it runs.
 > - In 9.3, 9.7 and 9.8, set `PROMPT_AGENT_VERSION` in `app/.env` to **your own** agent's version.
 
 ## Prerequisites
 - Modules 1, 3, and 4 completed. `issue-triage-agent` has the knowledge base connected.
 - **Foundry User** role on the project; see [evaluation permissions](https://learn.microsoft.com/azure/foundry/observability/how-to/evaluation-permissions) for the full role list.
-- A GPT deployment for the AI-assisted (judge) evaluators, for example `gpt-4.1-mini`. Deploy one from **Discover** > **Models** if your instructor asks you to.
+- A GPT deployment for the AI-assisted (judge) evaluators, for example `gpt-4.1-mini`. Deploy one from **Discover** > **Models** if your instructor asks you to. In an instructor-led workshop, use the existing `gpt-5-mini` deployment.
 
 ## What is evaluated
 | Option | Used here | Notes |

@@ -1,4 +1,4 @@
-# Module 4 - Configure Foundry IQ with Azure Storage (portal)
+# Module 4 - Configure Foundry IQ with Azure AI Search (portal)
 
 ## Objective
 Ground the Prompt Agent in Contoso Telecom knowledge: put the synthetic documents into a **Foundry IQ knowledge base**, connect it to `issue-triage-agent`, and compare grounded and ungrounded answers. This is the "link an issue to an existing solution" use case.

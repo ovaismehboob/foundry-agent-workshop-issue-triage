@@ -21,7 +21,7 @@ All data is synthetic. Contoso Telecom, its customers, areas, and incidents are 
 | 1 | [Create a Prompt Agent in the Microsoft Foundry portal](student/module-01-prompt-agent-portal.md) | Portal |
 | 2 | [Build and run the basic Python application](student/module-02-basic-app.md) | Python |
 | 3 | [Extend the application with Microsoft Agent Framework](student/module-03-agent-framework.md) | Python |
-| 4 | [Configure Foundry IQ with Azure Storage](student/module-04-foundry-iq-portal.md) | Portal |
+| 4 | [Configure Foundry IQ with Azure AI Search](student/module-04-foundry-iq-portal.md) | Portal |
 | 5 | [Use Foundry IQ from the Python application](student/module-05-foundry-iq-app.md) | Python |
 | 6 | [Containerize the application](student/module-06-containerize.md) | Docker |
 | 7 | [Deploy as a hosted agent](student/module-07-hosted-agent.md) | azd / portal |
