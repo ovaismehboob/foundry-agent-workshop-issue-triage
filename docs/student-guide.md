@@ -52,7 +52,7 @@ If your instructor gave you an account and a **handout**, this is your path. Eve
 
 **Three rules for a shared workshop**
 1. Use only **your own** names (project, `kbtriage-<id>`, `kstriage-<id>`). Other students' objects are visible on the shared search service; leave them alone.
-2. If you see "forbidden" or "authorization failed", wait about five minutes (permissions take time to apply), then tell your instructor which step failed.
+2. If you see "forbidden", "authorization failed" or "You don't have permission to perform this action in this project", close the browser, sign in again in a new private window (permissions are refreshed at sign-in), and wait about five minutes. If it persists, tell your instructor which step failed.
 3. Never paste your Temporary Access Pass, keys, or tokens into code, chat, or screenshots.
 
 ## Get the lab files
