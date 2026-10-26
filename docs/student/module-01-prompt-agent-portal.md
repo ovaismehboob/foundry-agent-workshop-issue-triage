@@ -3,6 +3,11 @@
 ## Objective
 Create the first version of the Issue Triage Assistant as a **Prompt Agent** in the Microsoft Foundry portal, test it with a multi-turn conversation, and record the values the Python application needs later.
 
+> **Workshop quick path (do this, skip that)**
+> - **Skip 1.1 and 1.3.** Your instructor already created your project and deployed `gpt-5-mini`. You can't create projects or deploy models in a workshop.
+> - **Do:** open [ai.azure.com](https://ai.azure.com), sign in, and open **your own project** (the project name in your handout). Then 1.2 (your endpoint is also in your handout), 1.4 to 1.7.
+> - In 1.4, the model is already available: check that **Model** shows `gpt-5-mini` in 1.5.
+
 ## Prerequisites
 - [prerequisites.md](../prerequisites.md) completed: an Azure subscription, a dedicated lab resource group, and the roles listed there.
 - A browser signed in to the Azure account you use for the lab.
@@ -56,7 +61,7 @@ Foundry resource and project, one chat model deployment (billable per token).
 ### 1.4 Create the Prompt Agent
 1. Select **Build** in the top navigation. The left navigation shows **Agents**, **Models**, **Services**, **Tools**, **Knowledge**, **Memory**, **Guardrails**, **Data**, **Evaluations**, and **Fine-tune**.
 2. On the **Agents** page, select **New agent** > **Build an agent**.
-3. In the **Create an agent** dialog, enter **Agent name** `issue-triage-agent` (names must start and end with a letter or number; hyphens are allowed), keep **Interaction mode** set to **Text**, and select **Create agent and open playground**. Version 1 of the agent is created.
+3. In the **Create an agent** dialog, enter **Agent name** `issue-triage-agent` (names must start and end with a letter or number; hyphens are allowed), keep **Interaction mode** set to **Text**, and select **Create** (older portal versions label the button **Create agent and open playground**). Version 1 of the agent is created and the agent playground opens.
 
 > Alternative path (official Microsoft Learning lab): in the model playground, set the instructions and select **Save as agent**. Both paths create the same kind of Prompt Agent.
 

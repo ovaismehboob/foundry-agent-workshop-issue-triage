@@ -81,10 +81,13 @@ Not needed: storage account (students use the **File** knowledge source), one se
 - Search roles apply to the whole service, so a student can change another student's knowledge base. Unique names prevent accidents only. Brief students not to touch other names.
 - Application Insights and the workspace are shared: students can see each other's traces. Acceptable only with synthetic data.
 - Students with Foundry Project Manager at **Foundry resource** scope can manage every project. The script grants it on the student's own project only.
+- **The portal's Connect button needs more than students have.** On **Build** > **Knowledge**, a student with Foundry User and Foundry Project Manager on their own project (plus Reader on the resource) sees **Connect** greyed out with "You don't have permission to perform this action in this project". In testing, adding Foundry User or Foundry Project Manager on the whole Foundry resource did **not** fix it; only Foundry Owner on the resource did, which would let students manage every project and assign roles. Instead `provision-workshop.ps1` creates the project's Cognitive Search connection itself, so students never press Connect. With that connection in place, a student with only the roles above could create a knowledge source and knowledge base, connect it to their agent, and get grounded answers (validated 26 October 2026). Connection names are unique across the whole Foundry resource, so the script names them `<search-service>-<project>`.
+- A student's portal session can go stale after you change roles. Run `provision-workshop.ps1` before students first sign in, or ask them to sign in again.
 
-**Pilot with one student account before the class** (these points depend on the tenant and preview features, and were not validated offline)
-- Module 4: the student can create the knowledge source and knowledge base on the shared service and connect them to the Prompt Agent using **Project Managed Identity**. If the portal asks for more rights, add the missing role in the script rather than widening scope.
-- Module 7: `azd ai agent init` selects the existing registry, `azd deploy` builds remotely, and the hosted agent starts (pull access).
+**Pilot with one student account before the class** (these points depend on the tenant and preview features)
+- Module 4: **validated** with a student-level account (see above): knowledge source, knowledge base, agent connection, and grounded answers.
+- Module 5: **validated** with a student-level account.
+- Module 7: `azd ai agent init` selects the existing registry, `azd deploy` builds remotely, and the hosted agent starts (pull access). **Not yet validated.** Don't use `--no-prompt` with `azd ai agent init`: it plans a new Premium registry in a new resource group.
 - Module 8: the student can assign the instructor's guardrail to their agent, connect the shared Application Insights, and see traces. Check whether this needs a role on the Foundry resource.
 - Quota: run 3-4 students at once to check model rate limits and knowledge-base indexing time.
 

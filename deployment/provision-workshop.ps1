@@ -19,6 +19,9 @@
     Search MI   : Cognitive Services User on the Foundry resource (knowledge bases call the models).
     Project MIs : Search Index Data Reader/Contributor + Search Service Contributor on the search service,
                   AcrPull on the registry (hosted agents pull their image).
+  It also creates, in each student's project, the project connection to the shared search service (the one the portal's
+  "Connect" button on Build > Knowledge would create; students can't use that button without Foundry Owner on the whole
+  Foundry resource). Existing connections are left alone.
   Finally it writes a non-secret handout (CSV + one .env snippet per student) to the output folder.
 
   It does NOT create projects, students, knowledge sources, knowledge bases, guardrails or hosted agents,
@@ -140,6 +143,30 @@ function Invoke-ArmPut {
         [System.IO.File]::WriteAllText($file, ($Body | ConvertTo-Json -Depth 10 -Compress))
         Invoke-Az -AzArgs @('rest', '--method', 'put', '--uri', $Uri, '--body', "@$file", '-o', 'none') | Out-Null
     } finally { Remove-Item $file -ErrorAction SilentlyContinue }
+}
+
+# Students can't use the portal's "Connect" button on Build > Knowledge (it needs rights only Foundry Owner on the whole
+# Foundry resource gives), so the project connection that button would create is made here instead. Re-runs skip projects
+# that already have a Cognitive Search connection to this service.
+function Ensure-SearchConnection {
+    param([string]$ProjectName)
+    $endpoint = "https://$SearchServiceName.search.windows.net/"
+    # Connection names are unique across the whole Foundry resource, so each project needs its own.
+    $connectionName = "$SearchServiceName-" + ($ProjectName -replace '[^a-zA-Z0-9]', '')
+    $base = "https://management.azure.com$accountId/projects/$ProjectName/connections"
+    foreach ($response in @(Get-AzJson -AzArgs @('rest', '--method', 'get', '--uri', "${base}?api-version=2025-06-01") -AllowFail)) {
+        foreach ($existing in @($response.value)) {
+            if ($existing.properties.category -eq 'CognitiveSearch' -and $existing.properties.target -ieq $endpoint) { $Summary.Skipped++; return }
+        }
+    }
+    if ($DryRun) { Write-DryRun "create search connection '$connectionName' in project '$ProjectName'"; $Summary.WouldAssign++; return }
+    try {
+        Invoke-ArmPut -Uri "${base}/${connectionName}?api-version=2025-06-01" -Body @{ properties = @{
+            category = 'CognitiveSearch'; target = $endpoint; authType = 'ProjectManagedIdentity'; isSharedToAll = $false
+            metadata = @{ ApiType = 'Azure'; ApiVersion = '2024-05-01-preview'; DeploymentApiVersion = '2023-11-01'; ResourceId = $searchId; displayName = $SearchServiceName; type = 'azure_ai_search' } } }
+        $Summary.Assigned++
+        Write-Info "created search connection '$connectionName' in project '$ProjectName'"
+    } catch { Write-Warning "Could not create the search connection in project '$ProjectName': $($_.Exception.Message)" }
 }
 
 function Get-ExistingAssignments([string]$Scope) {
@@ -419,6 +446,7 @@ foreach ($student in $students) {
 
     if (-not $seenProjects.ContainsKey($projectName)) {
         $seenProjects[$projectName] = $true
+        Ensure-SearchConnection -ProjectName $projectName
         $projectPrincipal = $student.Project.PrincipalId
         if (-not $projectPrincipal) { Write-Warning "Project '$projectName' has no system-assigned identity; skipping its search and registry roles."; continue }
         $projectWho = "project '$projectName' (managed identity)"
@@ -470,7 +498,8 @@ if ($DryRun) {
 }
 
 Write-Step 'Done'
-Write-Info ("Role assignments: {0} created, {1} already present, {2} would be created (dry run)" -f $Summary.Assigned, $Summary.Skipped, $Summary.WouldAssign)
+if ($DryRun) { Write-Info ("Changes: {0} would be made, {1} already present (dry run)" -f $Summary.WouldAssign, $Summary.Skipped) }
+else { Write-Info ("Changes: {0} made (role assignments and project connections), {1} already present" -f $Summary.Assigned, $Summary.Skipped) }
 Write-Host @"
 
 Next steps for the instructor:

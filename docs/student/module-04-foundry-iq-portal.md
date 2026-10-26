@@ -4,7 +4,7 @@
 Ground the Prompt Agent in Contoso Telecom knowledge: put the synthetic documents into a **Foundry IQ knowledge base**, connect it to `issue-triage-agent`, and compare grounded and ungrounded answers. This is the "link an issue to an existing solution" use case.
 
 > **Workshop quick path (do this, skip that)**
-> - **Do:** 4.3 connect to the shared search service, 4.4 create **your** knowledge base with **option B (File upload)**, 4.5 connect it to your agent, 4.6 test.
+> - **Do:** 4.3 open **Build** > **Knowledge** (the search service is already connected for you), 4.4 create **your** knowledge base with **option B (File upload)**, 4.5 connect it to your agent, 4.6 test.
 > - **Names:** use the ones in your handout, for example `kbtriage-s01` and `kstriage-s01`.
 > - **Skip:** creating a search service (4.1), checking roles (4.2), and option A (storage account). They are already done or not needed.
 
@@ -91,9 +91,11 @@ Nothing to create in the Azure portal. If something later says "forbidden", wait
 > When API-key authentication is disabled on the Foundry resource (common in enterprise tenants), the portal shows: "The search service will use managed identity to authenticate. Ensure the search service's managed identity has the Cognitive Services User role on this resource."
 
 ### 4.3 Connect the project to the search service
+> **Instructor-led workshop:** your instructor has already connected your project to the shared search service, so you **don't select a resource or press Connect**. When you open **Build** > **Knowledge**, the page already shows your search service under **Connection** and the list of knowledge bases (it may include other students' knowledge bases; ignore them). If you still see **Ground your agent in enterprise knowledge** with a greyed-out **Connect** button ("You don't have permission to perform this action in this project"), tell your instructor: your project's connection is missing.
+
 1. Make sure your project has an embedding deployment (in a workshop, `text-embedding-3-small` is already deployed; if it's missing from the list, tell your instructor). Self-paced: deploy `text-embedding-3-small` from **Discover** > **Models**.
 2. In the [Foundry portal](https://ai.azure.com), select **Build** > **Knowledge**.
-3. In **Foundry IQ resource**, select your search service. In **Auth Type**, select **Project Managed Identity** (keyless). Select **Connect**.
+3. In **Foundry IQ resource**, select your search service. In **Auth Type**, select **Project Managed Identity** (keyless). Select **Connect**. *(Self-paced only; in a workshop this is already done, see the note above.)*
    > **API Key** is also offered. Prefer **Project Managed Identity**; it needs no stored secret.
 
 ### 4.4 Create the knowledge base
@@ -117,7 +119,7 @@ Nothing to create in the Azure portal. If something later says "forbidden", wait
 
 #### Option B - File upload (preview, no storage account) - validated; use this in a workshop
 1. Select **Upload files** and choose the seven files from the `knowledge` folder.
-2. The **Create a knowledge source** dialog shows **File (Preview)**: "Upload files directly — no storage account or connection string needed. Service-managed processing." Set **Name** `kstriageknowledge` (shared workshop: `kstriage-<id>` from your handout), a **Description**, and the **Embedding model** (`text-embedding-3-small`), then select **Create**.
+2. The **Create a knowledge source** dialog shows **File (Preview)**: "Upload files directly — no storage account or connection string needed. Service-managed processing." Set **Name** `kstriageknowledge` (shared workshop: `kstriage-<id>` from your handout), a **Description**, and the **Embedding model**, then select **Create**. **Change the embedding model:** the dialog defaults to `text-embedding-ada-002`; select `text-embedding-3-small` from the list.
 
 ![Create a knowledge source dialog of type File (Preview) with name kstriageknowledge, a description, the text-embedding-3-small embedding model, a managed identity notice, and the list of files to upload.](../images/m04-file-knowledge-source.png)
 
@@ -169,6 +171,7 @@ Compare with the ungrounded answers from Module 1 (use the **Version** selector 
 | Knowledge source stays non-active | Indexing still running or failed | Wait and refresh; check role assignments in step 4.2. |
 | Blob source can't reach storage | Tenant policy disables public network access | Use option B, or ask for private networking. |
 | No embedding model in the list | No embedding deployment | Deploy `text-embedding-3-small`, then refresh. |
+| Greyed-out **Connect** on **Build** > **Knowledge**: "You don't have permission to perform this action in this project" | Workshop: your project's search connection wasn't created | Tell your instructor to run `provision-workshop.ps1` again, which creates it. Don't ask for Foundry Owner. |
 | Free tier not available | One Free service per subscription already exists | Use Basic (cost). In an instructor-led workshop this doesn't apply: use the shared service. |
 | Can't create the knowledge source or knowledge base ("forbidden") in a shared workshop | A role hasn't applied yet, or is missing | Wait a few minutes and refresh; then tell your instructor which action failed. |
 | Someone else's knowledge base appears in the list | The search service is shared | Ignore it. Use and change only your own `kbtriage-<id>` and `kstriage-<id>`. |

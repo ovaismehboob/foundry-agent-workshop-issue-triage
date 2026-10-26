@@ -94,7 +94,7 @@ python -m triage_desk triage ISS-1009 --engine agent --compare
 
 ### Expected output
 - `prompt-agent`: a triage card from your portal agent. The app parses `Category` and `Priority` from the card and applies the routing policy, for example `NETWORK`, `P2`, `Network Operations`. The comparison shows `<>` where the AI disagrees with the rules (rules said `UNCLASSIFIED`).
-- `agent`: `Category: (free text)`. The code-defined agent only has the generic instruction `You are a helpful assistant.`, so it answers in its own format.
+- `agent`: the code-defined agent only has the generic instruction `You are a helpful assistant.`, so it answers in its own free-text format. The single result shows `Response (free text):` followed by the answer, and the `--compare` table shows `(free text)` as its category.
 
 ### Checkpoint
 - [ ] Both engines respond. The Prompt Agent recognises the no-signal icon that the keyword rules missed.
