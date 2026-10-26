@@ -46,7 +46,7 @@ If your instructor gave you an account and a **handout**, this is your path. Eve
 | 4 | Create **your** knowledge source and knowledge base on the shared search service (**File upload**), connect it to your agent | Search service, roles, embedding model. **Skip** creating a search service or storage account |
 | 5 | Put your search endpoint and knowledge base name in `app/.env`, enable step 5.1, run the tests | Search roles |
 | 6 | Build and run the container (needs Docker) | - |
-| 7 | `azd ai agent init` (pick the **existing** registry), `azd deploy`, invoke your agent | Registry and its access. **Never** create a new registry. **Don't** run the role script: send your agent's principal ID to the instructor |
+| 7 | Run the commands in your handout `<your-id>.module7.txt` (`azd ai agent init`, `azd env set` for the shared registry), then `azd deploy` and invoke your agent | Registry and its access. **Skip** `azd provision` (you can't run it) and never create a new registry. **Don't** run the role script: send your agent's principal ID to the instructor |
 | 8 | Assign the instructor's guardrail to your agent, test it, connect the shared Application Insights, read traces | Guardrail, Application Insights. **Skip** creating a guardrail or Application Insights |
 | 9 | Upload your dataset, run the evaluation, change the instructions, compare | Judge model: use the one your instructor names |
 

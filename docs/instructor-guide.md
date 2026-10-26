@@ -60,7 +60,7 @@ Not needed: storage account (students use the **File** knowledge source), one se
    ./deployment/provision-workshop.ps1 -SubscriptionId <id> -ResourceGroup <rg> -FoundryAccountName <foundry-resource> `
        -StudentsCsv ./deployment/students.csv
    ```
-   The script is safe to re-run. It writes `deployment/output/handout.csv` and one `<student>.env.txt` per student (no secrets). Give each student their file.
+   The script is safe to re-run. It writes `deployment/output/handout.csv` and, for each student, `<student>.env.txt` (Modules 3 and 5 settings) and `<student>.module7.txt` (the Module 7 commands, including the shared-registry values). Neither contains secrets. Give each student both files.
 4. In the Foundry portal, create the guardrail once (**Build** > **Guardrails**). Students assign it to their own agent in Module 8.
 5. After a student deploys a hosted agent (Module 7), run [assign-hosted-agent-roles.ps1](../deployment/assign-hosted-agent-roles.ps1) with that agent's identity.
 6. After the workshop, preview and run [remove-workshop-infra.ps1](../deployment/remove-workshop-infra.ps1). It deletes only resources tagged `workshop=foundry-agent-lab`, never the Foundry resource, projects, or a registry that existed before.
@@ -87,7 +87,7 @@ Not needed: storage account (students use the **File** knowledge source), one se
 **Pilot with one student account before the class** (these points depend on the tenant and preview features)
 - Module 4: **validated** with a student-level account (see above): knowledge source, knowledge base, agent connection, and grounded answers.
 - Module 5: **validated** with a student-level account.
-- Module 7: `azd ai agent init` selects the existing registry, `azd deploy` builds remotely, and the hosted agent starts (pull access). **Not yet validated.** Don't use `--no-prompt` with `azd ai agent init`: it plans a new Premium registry in a new resource group.
+- Module 7: **validated** with a student-level account (26 October 2026, `azd` 1.37.1, `azure.ai.agents` beta.22): `azd ai agent init --no-prompt`, then `azd env set` to point `azd` at the shared registry, then `azd deploy` (about 2.5 minutes, remote build), `azd ai agent show`, and `azd ai agent invoke`. **Students can't run `azd provision`:** it is a subscription-level deployment and fails with `AuthorizationFailed`; without the registry values `azd` plans a new Premium registry in a new resource group. The handout `<student>.module7.txt` carries the exact commands. The hosted agent identity needs `assign-hosted-agent-roles.ps1` and then about five minutes before it can use the knowledge base. Use the full ticket text (not just "Triage issue ISS-1001") to check the knowledge base.
 - Module 8: the student can assign the instructor's guardrail to their agent, connect the shared Application Insights, and see traces. Check whether this needs a role on the Foundry resource.
 - Quota: run 3-4 students at once to check model rate limits and knowledge-base indexing time.
 

@@ -10,8 +10,10 @@ Deploy the same Agent Framework triage agent to **Foundry Agent Service** as a *
 - Container images must be **linux/amd64**; the container serves port **8088**; the platform provides `/readiness` routing, a dedicated Microsoft Entra **agent identity**, and a dedicated endpoint.
 
 > **Workshop quick path (do this, skip that)**
-> - **Do:** 7.1 check tools, 7.2 `azd ai agent init` (**pick the existing registry**), 7.3 add your knowledge base name, 7.5 `azd deploy`, 7.6 note your agent's principal ID, 7.8 invoke.
-> - **Send your instructor** the principal ID from 7.6 and your project name, then wait a few minutes (this replaces 7.7).
+> - **Use your handout file `<your-id>.module7.txt`.** It holds the exact commands for your project and the shared registry. Copy them into a **new PowerShell window** (so `azd` is on the PATH) from the repository root.
+> - **Do:** 7.1 check tools, 7.2 `azd ai agent init`, 7.3 add the three `env` lines to `azure.yaml`, then the `azd env set` lines from your handout, **7.5 `azd deploy`**, 7.6 note your agent's principal ID, 7.8 invoke.
+> - **Skip 7.4 (`azd provision`).** You don't have the rights for it (it fails with `AuthorizationFailed`), and without the handout values `azd` would plan a new Premium registry. The handout's `azd env set` lines point `azd` at the shared registry instead.
+> - **Send your instructor** the principal ID from 7.6 and your project name, then wait about **five minutes** before 7.8 (this replaces 7.7).
 > - **Skip:** creating a registry or resource group, and running `assign-hosted-agent-roles.ps1` (you don't have permission).
 
 ## Prerequisites
@@ -80,9 +82,9 @@ azd ai agent init --src ./app --agent-name issue-triage-hosted --deploy-mode con
 ```
 Answer the prompts. When asked about a container registry, prefer an **existing** registry your instructor provides (or pass `--acr-connection <connection-name>`).
 
-> **Instructor-led workshop:** use the registry named in your handout (`Registry (Module 7)`). **Select the existing registry; never accept the "create a new registry" option**, and don't use `--no-prompt`. Your instructor already gave you permission to build images in that registry and gave your project permission to pull from it. After your hosted agent is deployed, send your instructor the agent identity's principal ID (see 7.7) so they can grant it access to the shared search service.
+> **Instructor-led workshop:** use the command in your handout file `<your-id>.module7.txt`. It adds `--no-prompt`, which is safe here because `init` only writes local files and you skip `azd provision` (the step that would create a registry). The shared registry is already set up: your instructor gave you permission to build images in it and gave your project permission to pull from it. After your hosted agent is deployed, send your instructor the agent identity's principal ID (see 7.6) so they can grant it access to the shared search service.
 
-> **Cost warning (validated):** with `--no-prompt`, or if you accept a new registry, `azd` creates a **new resource group** named `rg-<environment>-foundry` (for example `rg-triage-lab-foundry`) with a **Premium** Azure Container Registry, billed daily. Delete that resource group during cleanup ([cost-and-cleanup.md](../cost-and-cleanup.md)).
+> **Cost warning (validated):** if you run `azd provision` without pointing `azd` at an existing registry (for example with `--no-prompt`), `azd` plans a **new resource group** named `rg-<environment>-foundry` (for example `rg-triage-lab-foundry`) with a **Premium** Azure Container Registry, billed daily. Delete that resource group during cleanup ([cost-and-cleanup.md](../cost-and-cleanup.md)). In a workshop you never run `azd provision`.
 
 The command generates `azure.yaml` at the repository root, `app/.agentignore`, and an `.azure/<environment>` folder (ignored by Git). It doesn't overwrite your code.
 
@@ -114,7 +116,7 @@ azd provision -e triage-lab
 ```
 Validated: about 1-2 minutes; it creates the container registry and its project connection. Optional: `azd ai agent run` starts the agent locally with the `startupCommand` and opens the Agent Inspector; in a second terminal, `azd ai agent invoke --local "Triage issue ISS-1001"`. Stop it with **Ctrl+C**.
 
-> **Instructor-led workshop:** the registry already exists, so provisioning should only connect your project to it. If `azd` offers to create a new registry or resource group, stop and ask your instructor.
+> **Instructor-led workshop: skip this step.** `azd provision` runs a subscription-level deployment, which you aren't allowed to do (`AuthorizationFailed`), and the registry already exists. Instead, run the `azd env set` lines in your handout `<your-id>.module7.txt` (they point `azd` at the shared registry), then go straight to 7.5. If `azd` ever offers to create a new registry or resource group, stop and ask your instructor.
 
 ### 7.5 Deploy the hosted agent
 ```powershell
@@ -186,15 +188,15 @@ Otherwise, from the repository root, use the agent principal ID you captured in 
 ./deployment/assign-hosted-agent-roles.ps1 -AgentPrincipalId $agentPrincipalId `
     -SearchServiceName <search-service> -ResourceGroup <lab-resource-group>
 ```
-This assigns **Search Index Data Reader** and **Reader** on the lab search service only. Both are required: without **Reader**, the agent fails with `Operation returned an invalid status 'Forbidden'` because the knowledge base provider can't read the knowledge base definition. Role assignments can take a few minutes.
+This assigns **Search Index Data Reader** and **Reader** on the lab search service only. Both are required: without **Reader**, the agent fails with `Operation returned an invalid status 'Forbidden'` because the knowledge base provider can't read the knowledge base definition. Role assignments can take up to about five minutes to start working (validated: still `Forbidden` after 90 seconds, working after about five).
 
 ### 7.8 Invoke the hosted agent with the same scenarios
 ```powershell
 azd ai agent invoke issue-triage-hosted "Triage issue ISS-1014" -e triage-lab
 azd ai agent invoke issue-triage-hosted "Why did you choose that priority?" -e triage-lab     # same session
-azd ai agent invoke issue-triage-hosted "Triage issue ISS-1001" -e triage-lab --new-session  # KI-2041 if Module 5 is enabled
+azd ai agent invoke issue-triage-hosted "Triage this customer issue. Issue ID: ISS-1001. Customer message: Since 7am I have no mobile data at all. I live in Harbour District. Calls and SMS still work." -e triage-lab --new-session  # KI-2041 if Module 5 is enabled
 ```
-Validated results: ISS-1014 is `ROAMING` / `P1` / Roaming Desk (1 hour); the follow-up explains the P1 using the earlier turn; ISS-1001 shows `Known issue: KI-2041`. The output also shows the conversation, session, and trace IDs. You can also chat with `issue-triage-hosted` in the portal playground.
+Validated results: ISS-1014 is `ROAMING` / `P1` / Roaming Desk (1 hour); the follow-up explains the P1 using the earlier turn; the ISS-1001 text shows `Known issue: KI-2041`. **Why the full text for ISS-1001:** the knowledge base is searched with the words in your message. `Triage issue ISS-1001` alone contains no area or symptom, so it finds nothing and returns `Known issue: None`. The output also shows the conversation, session, and trace IDs. You can also chat with `issue-triage-hosted` in the portal playground.
 
 **What you should see** (for `Triage issue ISS-1014`; abbreviated):
 

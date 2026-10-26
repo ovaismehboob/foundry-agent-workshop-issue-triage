@@ -463,7 +463,7 @@ foreach ($student in $students) {
 Write-Step 'Student handout'
 if (-not $OutputDir) { $OutputDir = Join-Path $PSScriptRoot 'output' }
 if ($DryRun) {
-    Write-DryRun "write handout.csv and one <student>.env.txt per student to $OutputDir"
+    Write-DryRun "write handout.csv, one <student>.env.txt and one <student>.module7.txt per student to $OutputDir"
 } else {
     New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
     $handout = foreach ($student in $students) {
@@ -492,6 +492,34 @@ if ($DryRun) {
             "# Registry (Module 7): $AcrName"
         ) -join "`r`n"
         [System.IO.File]::WriteAllText((Join-Path $OutputDir "$($student.StudentId).env.txt"), $envText + "`r`n")
+
+        # Module 7: students can't run 'azd provision' (it needs subscription-level rights), so they point azd at the shared
+        # registry themselves with these values and go straight to 'azd deploy'.
+        if ($acrId) {
+            $projectResourceId = "$accountId/projects/$($student.Project.Name)"
+            $module7 = @(
+                "# Module 7 - hosted agent. Copy these commands; they contain no secrets.",
+                "# Run them from the repository root in a NEW PowerShell window (so that 'azd' is on the PATH).",
+                "",
+                "# 7.2",
+                "azd ai agent init --src ./app --agent-name issue-triage-hosted --deploy-mode container --project-id `"$projectResourceId`" --model-deployment $ChatDeploymentName --protocol responses -e triage-lab --no-prompt",
+                "",
+                "# 7.3 and 7.4: instead of 'azd provision' (you don't have the rights for it), point azd at the shared registry.",
+                "azd env set AZURE_CONTAINER_REGISTRY_ENDPOINT $acrLoginServer -e triage-lab",
+                "azd env set AZURE_CONTAINER_REGISTRY_RESOURCE_ID `"$acrId`" -e triage-lab",
+                "azd env set AZD_FOUNDRY_ACR_MODE existing -e triage-lab",
+                "azd env set AZD_AGENT_SKIP_ACR true -e triage-lab",
+                "azd env set AI_AGENT_PENDING_PROVISION '`"`"' -e triage-lab",
+                "",
+                "# Module 5 values for the hosted agent (also add the three env lines to azure.yaml as Module 7.3 says).",
+                "azd env set AZURE_SEARCH_ENDPOINT $searchEndpoint -e triage-lab",
+                "azd env set AZURE_SEARCH_KNOWLEDGE_BASE_NAME $($student.KnowledgeBase) -e triage-lab",
+                "",
+                "# 7.5",
+                "azd deploy -e triage-lab"
+            ) -join "`r`n"
+            [System.IO.File]::WriteAllText((Join-Path $OutputDir "$($student.StudentId).module7.txt"), $module7 + "`r`n")
+        }
     }
     $handout | Export-Csv -Path (Join-Path $OutputDir 'handout.csv') -NoTypeInformation -Encoding UTF8
     Write-Info "written to $OutputDir (ignored by Git)"

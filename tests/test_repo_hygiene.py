@@ -5,7 +5,7 @@ import re
 from conftest import ROOT
 
 TEXT_SUFFIXES = {".py", ".md", ".json", ".jsonl", ".txt", ".toml", ".yaml", ".yml", ".ps1", ".sh", ".example", ""}
-SKIP_DIRS = {".git", ".venv", "venv", "__pycache__", ".pytest_cache", ".lab-backup", ".azure"}
+SKIP_DIRS = {".git", ".venv", "venv", "__pycache__", ".pytest_cache", ".lab-backup", ".azure", "output"}  # output = generated, Git-ignored instructor handouts
 
 SECRET_PATTERNS = {
     "storage connection string": re.compile(r"AccountKey=[A-Za-z0-9+/=]{20,}"),

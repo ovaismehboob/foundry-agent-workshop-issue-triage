@@ -58,7 +58,11 @@ Start with `python -m triage_desk doctor --check-sign-in` (from `app`) and `pyth
 | `azd ai agent init` asks for values you don't have | Interactive prompts | Use the values from your notes; the project resource ID is under **Manage** > **Project details**. |
 | Agent version fails to start | Steps not enabled, or env var missing | `azd ai agent monitor`; check `azure.yaml` `env:`; `azd deploy` again. |
 | Image pull failure | Registry role missing for the project identity | Instructor assigns **Container Registry Repository Reader**. |
-| An extra resource group `rg-<env>-foundry` with a Premium registry appeared | `azd ai agent init` created a registry because none was selected | Expected; delete it during cleanup, or select an existing registry at init. |
+| An extra resource group `rg-<env>-foundry` with a Premium registry appeared | `azd provision` created a registry because none was selected | Delete it during cleanup. In a workshop, never run `azd provision`: use the registry values in your handout `<your-id>.module7.txt`. |
+| `ERROR: ... AuthorizationFailed ... Microsoft.Resources/deployments/whatIf/action` from `azd provision` (workshop) | `azd provision` needs a subscription-level deployment; students don't have it | Skip `azd provision`. Run the `azd env set` lines from your handout, then `azd deploy`. |
+| `AzureDeveloperCLICredential: executable not found on path` | `azd` was installed in this window and isn't on the PATH yet | Open a new PowerShell window, or add the `azd` folder to the PATH for this window. |
+| `azd ai agent invoke` returns `Operation returned an invalid status 'Forbidden'` | The hosted agent's identity has no search roles yet, or they haven't taken effect | Send your instructor the principal ID (7.6). After the roles are assigned wait about five minutes, then try again. |
+| Hosted agent answers but never returns `Known issue: KI-2041` | The knowledge base is searched with the words in your message, and `Triage issue ISS-1001` has none | Send the full ticket text, as in 7.8. |
 
 ## Azure Storage and Foundry IQ
 | Symptom | Cause | Fix |
