@@ -11,7 +11,7 @@ This repository is training material. It uses only synthetic data and must not b
 
 ## Identity
 - Local runs use `DefaultAzureCredential` with your `az login` session (keyless).
-- Hosted agents use the platform-created Microsoft Entra agent identity. Grant it only the roles it needs (Module 7.7).
+- Hosted agents use the platform-created Microsoft Entra agent identity. Module 7 is deployment-only, so the lab does not require Search roles for that identity. If extending the lab to query Search from the hosted agent, grant only the required resource-scoped roles.
 - Role assignments follow least privilege and are scoped to lab resources only (see [docs/prerequisites.md](docs/prerequisites.md#roles)).
 
 ## Application controls

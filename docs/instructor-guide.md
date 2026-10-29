@@ -64,7 +64,7 @@ Not needed: storage account (students use the **File** knowledge source), one se
    ```
    The script is safe to re-run. It writes `deployment/output/handout.csv` and, for each student, `<student>.env.txt` (Modules 3 and 5 settings) and `<student>.module7.txt` (the Module 7 commands, including the shared-registry values). Neither contains secrets. Give each student both files.
 4. In the Foundry portal, create the guardrail once (**Build** > **Guardrails**). Students assign it to their own agent in Module 8.
-5. After a student deploys a hosted agent (Module 7), run [assign-hosted-agent-roles.ps1](../deployment/assign-hosted-agent-roles.ps1) with that agent's identity.
+5. Before Module 8, open each project's Prompt Agent `issue-triage-agent` > **Traces** > **Connect** as the instructor and connect shared Application Insights using **Project Managed Identity**. Students test and trace only the Prompt Agent. Module 7 ends after hosted deployment verification; no hosted-agent Search role assignment or invocation is required.
 6. After the workshop, preview and run [remove-workshop-infra.ps1](../deployment/remove-workshop-infra.ps1). It deletes only resources tagged `workshop=foundry-agent-lab`, never the Foundry resource, projects, or a registry that existed before.
 
 **Roles the script assigns** (all scoped to lab resources, none at subscription or resource group level)
@@ -77,6 +77,7 @@ Not needed: storage account (students use the **File** knowledge source), one se
 | Student | Log Analytics Reader | Application Insights and workspace |
 | Project managed identity | Search Index Data Reader, Search Index Data Contributor, Search Service Contributor | Shared search service |
 | Project managed identity | AcrPull (Repository Reader if the registry uses ABAC) | Registry |
+| Project managed identity | Monitoring Metrics Publisher | Application Insights |
 | Search service managed identity | Cognitive Services User | Foundry resource |
 
 **Known trade-offs**
@@ -89,8 +90,8 @@ Not needed: storage account (students use the **File** knowledge source), one se
 **Pilot with one student account before the class** (these points depend on the tenant and preview features)
 - Module 4: **validated** with a student-level account (see above): knowledge source, knowledge base, agent connection, and grounded answers.
 - Module 5: **validated** with a student-level account.
-- Module 7: **validated** with a student-level account (26 October 2026, `azd` 1.37.1, `azure.ai.agents` beta.22): `azd ai agent init --no-prompt`, then `azd env set` to point `azd` at the shared registry, then `azd deploy` (about 2.5 minutes, remote build), `azd ai agent show`, and `azd ai agent invoke`. **Students can't run `azd provision`:** it is a subscription-level deployment and fails with `AuthorizationFailed`; without the registry values `azd` plans a new Premium registry in a new resource group. The handout `<student>.module7.txt` carries the exact commands. The hosted agent identity needs `assign-hosted-agent-roles.ps1` and then about five minutes before it can use the knowledge base. Use the full ticket text (not just "Triage issue ISS-1001") to check the knowledge base.
-- Module 8: the student can assign the instructor's guardrail to their agent, connect the shared Application Insights, and see traces. Check whether this needs a role on the Foundry resource.
+- Module 7: **deployment validated** with a student-level account (26 October 2026, `azd` 1.37.1, `azure.ai.agents` beta.22): `azd ai agent init --no-prompt`, then `azd env set` to point `azd` at the shared registry, then `azd deploy` (about 2.5 minutes, remote build) and `azd ai agent show`. The exercise ends when the deployment is active; do not invoke or test it. **Students can't run `azd provision`:** it is a subscription-level deployment and fails with `AuthorizationFailed`; without the registry values `azd` plans a new Premium registry in a new resource group. The handout `<student>.module7.txt` carries the exact commands.
+- Module 8: the instructor completes the Application Insights connection for each project from the Prompt Agent's Traces tab. Preassigned Monitoring Metrics Publisher does not bypass the portal's caller-permission check. Students assign the instructor's guardrail to `issue-triage-agent`, test that Prompt Agent, and review its traces without role-assignment permission. Hosted agents are not tested or traced.
 - Quota: run 3-4 students at once to check model rate limits and knowledge-base indexing time.
 
 ### Resource preparation checklist (per student project)
@@ -115,7 +116,7 @@ For the shared-infrastructure model, [provision-workshop.ps1](../deployment/prov
 | Student | Log Analytics Reader | Application Insights / workspace | 8 |
 | Project managed identity | Search Index Data Reader, Search Index Data Contributor, Search Service Contributor | Search service | 4 (Project Managed Identity connection) |
 | Project managed identity | Container Registry Repository Reader | Registry used by `azd` | 7 (assigned automatically only for new projects) |
-| Hosted agent identity | Search Index Data Reader + Reader | Search service | 7.7 |
+| Project managed identity | Monitoring Metrics Publisher | Application Insights | 8.3 (instructor completes connection) |
 | Search service managed identity | Cognitive Services User | Foundry resource | 4/5 (knowledge base calls embedding and chat models) |
 | Search service managed identity | Storage Blob Data Reader | Storage account | 4 option A |
 
@@ -129,7 +130,7 @@ Run the whole lab once in the **target tenant and region**, as a user with the s
 3. Module 3: `python scripts/lab_state.py solution`, then `python -m triage_desk triage ISS-1009 --engine agent` and `--engine prompt-agent`.
 4. Module 4/5: knowledge source becomes **active**; `python scripts/score_triage.py --engine agent --ids EVAL-001,EVAL-003,EVAL-017,EVAL-019,EVAL-022`.
 5. Module 6: `docker build` succeeds on the training machines (check proxy/mirror access) and `/readiness` returns 200.
-6. Module 7: `azd ai agent init ...`, `azd deploy`, `azd ai agent invoke`, `azd ai agent monitor`, `azd ai agent delete`.
+6. Module 7: `azd ai agent init ...`, `azd deploy`, then `azd ai agent show` to verify active deployment. No hosted-agent invocation or runtime test; delete the deployment during cleanup.
 7. Module 8: guardrail creation and assignment; traces appear.
 8. Module 9: dataset upload, an evaluation run completes, a second run after the instruction change.
 9. `python scripts/lab_state.py reset` before handing the repository to students.
@@ -160,7 +161,7 @@ Record any portal differences in the [documentation gap register](#documentation
 | 4 | Knowledge source vs knowledge base; agentic retrieval; preview status | ISS-1001 linked to KI-2041; Old Town not invented |
 | 5 | Context providers; citations only if returned | `Sources returned by Foundry IQ` |
 | 6 | Same code, new host; no secrets in images; amd64 | `/readiness` 200 and `docker logs` tool calls |
-| 7 | Hosted agent identity, scale to zero, azure.yaml, platform-injected variables | `azd ai agent invoke` + `monitor` |
+| 7 | Hosted agent identity, scale to zero, azure.yaml, platform-injected variables | Successful `azd deploy` + active status from `azd ai agent show` |
 | 8 | Layers of control; what guardrails do and don't do; optional Defender/Purview | Prompt-attack test blocked; trace with a knowledge tool call |
 | 9 | Quality evaluators vs exact labels; change-and-compare loop | Two runs compared |
 
@@ -179,14 +180,13 @@ Full list: [troubleshooting.md](troubleshooting.md).
 ## Expected results
 - Agent engine fixes most of the rules engine's mistakes (ISS-1006, 1009, 1014, 1019) and flags ISS-1012.
 - Grounded answers link ISS-1001/1019 to KI-2041, ISS-1003 to KI-2043, ISS-1017 to KI-2042; Old Town has no incident.
-- The hosted agent gives the same triage as the local agent.
+- The hosted deployment is active; no hosted-agent responses or traces are required. Module 8 tests and traces the Prompt Agent.
 - Results vary between runs and models; discuss variation as part of evaluation.
 
 ## Optional extensions
 - Use the Foundry **Toolbox** to expose the knowledge base to the hosted agent instead of the context provider (see the official sample `17-foundry-iq-toolbox`).
 - Add an **Invocations** protocol endpoint for batch triage of the whole queue.
-- Enable continuous evaluation in **Monitor settings** for the hosted agent (watch token cost).
-- Evaluate the hosted agent with the same dataset (Agent target).
+- Enable continuous evaluation in **Monitor settings** for the Prompt Agent (outside the required exercise; watch token cost).
 - Bilingual acknowledgments (Arabic/English) as an explicit requirement in the instructions, plus evaluation rows for it.
 - Microsoft Defender and Microsoft Purview integrations with the customer's security team (separate enablement and licensing).
 
@@ -228,7 +228,7 @@ Full list: [troubleshooting.md](troubleshooting.md).
 | 4 | Validated with the **File (Preview)** knowledge source and Project Managed Identity; Blob option not validated (tenant storage policy) |
 | 5 | Validated: KI-2041/KI-2042/KI-2043 linked; Old Town not invented; sources shown |
 | 6 | Run, invoke, logs, and cleanup validated with the image built by Azure Container Registry; local `docker build` not possible in the authoring network (PyPI blocked) |
-| 7 | Validated: `azd ai agent init`, `azd provision`, `azd deploy` (remote build), `show`, role script, `invoke` (multi-turn, grounded), `monitor` |
+| 7 | Deployment-only exercise: `azd ai agent init`, shared-registry configuration, `azd deploy` (remote build), and `show` to verify active status. Earlier runtime validation is not part of the exercise |
 | 8 | Validated: guardrail created and assigned; jailbreak and PII blocked; abusive complaint allowed; Application Insights connected; traces and Monitor tab reviewed |
 | 9 | Dataset upload, local scorer, and the full portal evaluation wizard validated up to **Submit**. The run (22 evaluators) was still **In progress** after 30+ minutes and its results weren't reviewed; steps 9.6-9.9 for the portal results and the results screenshot remain to be confirmed at the first delivery |
 

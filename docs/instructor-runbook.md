@@ -57,6 +57,8 @@ Preview, then run:
 
 It creates or reuses the shared Standard search service (about USD 0.34 per hour while it exists), Log Analytics (1 GB/day cap), Application Insights and the embedding deployment. For each student it assigns Foundry User and Foundry Project Manager on their own project, plus the search, registry and monitoring roles, and creates the project's search connection. It is safe to re-run.
 
+For Module 8.3, it grants each project's managed identity **Monitoring Metrics Publisher** on the shared Application Insights resource and each student **Log Analytics Reader** on Application Insights and its Log Analytics workspace. These are resource-scoped grants; students do not receive permission to assign roles. The script does not configure the Application Insights connection. As the instructor, open each project's **Prompt Agent** `issue-triage-agent` > **Traces** > **Connect**, select the shared Application Insights resource and **Project Managed Identity**, and complete the connection before students run Module 8 tests. The connection is project-wide, but students generate and review only Prompt Agent traces; do not test or configure tracing from the hosted agent.
+
 - If it stops with "The students CSV has problems", that can be a one-off Entra lookup failure. Nothing was changed; run it again.
 - It writes `deployment/output/`: `handout.csv`, and for each student `sNN.env.txt` (Modules 3 and 5) and `sNN.module7.txt` (Module 7). None contain secrets.
 
@@ -66,11 +68,12 @@ It creates or reuses the shared Standard search service (about USD 0.34 per hour
 In the Foundry portal as yourself: **Build** > **Guardrails** > **Create**. Name it `grissuetriage`, keep the default controls, turn on **PII** (for example credit card) and **Task adherence**, and don't select any agents or models. Students assign it to their own agent in Module 8.1; they cannot create guardrails.
 
 ## Step 6. Check the evaluation works
-Module 9 depends on the portal evaluation. In the validation tenant, a run submitted by a student completed but **every evaluator errored** on every row, and the cause wasn't found.
+Module 9 depends on the portal evaluation. On 29 October 2026, student runs failed in about 8 to 12 seconds before processing rows. The confirmed error was `probability_threshold is only supported for Decision models`: ToolUseQuality and OutputQuality were configured with `gpt-5-mini` and `probability_threshold: 0.5`. This is an evaluator configuration error, not evidence that the student needs more roles.
 
-1. As yourself, open a project and run the Module 9.5 evaluation with a few evaluators.
-2. If scores appear, the problem is specific to student accounts: tell me or investigate roles.
-3. If it errors for you too, the likely cause is the service or region: tell students Module 9 gives the local scorer results (`score_triage.py`) and an evaluation that may show errors, and treat 9.5 to 9.9 as a demonstration.
+1. Follow [Module 9.5](student/module-09-evaluation.md#95-create-the-portal-evaluation): create a **new evaluation**, keep the existing dataset and Prompt Agent version, and select only **Relevance** with `gpt-5-mini` for the first smoke test. Remove ToolUseQuality and OutputQuality; leave Probability threshold unset if the portal exposes it.
+2. Verify dataset rows and scores appear before adding applicable evaluators. A successful smoke-test rerun has not yet been verified; compare the exact error if another failure occurs. **Add run** on the unchanged failed evaluation reuses the invalid configuration.
+3. Students who already uploaded the dataset resume at **9.5**, not the beginning of Module 9. Use identical evaluator settings for the before/after comparison.
+4. An earlier validation run completed but every evaluator errored on every row; that separate symptom remains undiagnosed. If portal evaluation stays blocked, use the local scorer (`score_triage.py`) and treat 9.5 to 9.9 as a demonstration rather than claiming portal results succeeded.
 
 ## Step 7. Check one student sign-in
 In a private browser window, sign in at [ai.azure.com](https://ai.azure.com) as `user1_foundrywksp` with its pass, then check:
@@ -85,11 +88,8 @@ Give each student: their account name, their pass, `sNN.env.txt` and `sNN.module
 
 During the class:
 - **Module 4.** Students create `kstriage-<id>` and `kbtriage-<id>` on the shared service. Tell them to leave other students' objects alone.
-- **Module 7.** Students send you their agent's principal ID (7.6). Run once per student, then ask them to wait about **five minutes**:
-
-  ```powershell
-  ./deployment/assign-hosted-agent-roles.ps1 -AgentPrincipalId <principal-id> -SearchServiceName <search-service> -ResourceGroup <resource-group>
-  ```
+- **Module 7.** Students deploy the hosted agent and verify its active status in 7.6. That completes the exercise. Do not collect agent principal IDs, assign hosted-agent Search roles, or ask students to invoke or test the hosted agent.
+- **Module 8.** Use only the Prompt Agent `issue-triage-agent` for guardrail tests, traces, and monitoring. Complete its project's Application Insights connection as the instructor (Step 4); students send messages and review traces without role-administration permissions.
 - **"You don't have permission" anywhere.** First close the browser and sign in again; check the pass hasn't expired. Re-run `provision-workshop.ps1` if a student's roles or connection are missing.
 - **Quota.** If many students run evaluations or knowledge-base indexing at once, expect slowdowns; stagger Module 9.
 

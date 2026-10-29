@@ -36,7 +36,6 @@ Captured from a dedicated lab project (`projtriagelab`) in the Microsoft Non-Pro
 |---|---|---|---|
 | `m07-azd-deploy-success.png` | 7 | Terminal: successful `azd deploy` | Run `azd deploy -e triage-lab` (step 7.5); capture the `SUCCESS` line and next steps |
 | `m07-azd-agent-show.png` | 7 | Terminal: `azd ai agent show --output json` with `"status": "active"` | Run step 7.6; capture the trimmed JSON |
-| `m07-azd-agent-invoke.png` | 7 | Terminal: `azd ai agent invoke` triage card for ISS-1014 | Run step 7.8; capture the status line and triage card |
 | `m09-evaluation-results.png` | 9 | Evaluation run results | Build > Agents > issue-triage-agent > Evaluation > select the run |
 
 The placeholder in the student guide lists what must be visible, what to redact, the caption, and the alt text. When you add the screenshot, replace the placeholder block with the image, caption, and "what to observe" text.

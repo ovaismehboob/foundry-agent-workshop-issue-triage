@@ -66,7 +66,7 @@ Use the least privilege that works. The Foundry roles were renamed recently (Fou
 | Student | **Search Index Data Reader** + **Reader** (or Search Service Contributor) | Search service | Query the knowledge base from Python; the provider reads the knowledge base definition first (Module 5) |
 | Student | **Log Analytics Reader** | Application Insights / Log Analytics | View traces (Module 8) |
 | Project managed identity | **Search Index Data Reader**, **Search Index Data Contributor**, **Search Service Contributor** | Search service | Foundry IQ connection with Project Managed Identity (Module 4) |
-| Hosted agent identity | **Search Index Data Reader** + **Reader** | Search service | Query the knowledge base when hosted (Module 7.7) |
+| Project managed identity | **Monitoring Metrics Publisher** | Application Insights | Publish telemetry for Prompt Agent tracing (Module 8.3); instructor completes the connection |
 | Project managed identity | **Container Registry Repository Reader** | Container registry | Pull the agent image (assigned by `azd` for new projects; check for existing projects) |
 | Search service managed identity | **Cognitive Services User** | Foundry resource | The knowledge base calls the embedding and chat models (required when API-key auth is disabled on the Foundry resource) |
 | Search service managed identity | **Storage Blob Data Reader** | Storage account | Blob knowledge source (Module 4 option A) |

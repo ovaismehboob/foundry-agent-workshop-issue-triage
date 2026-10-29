@@ -61,8 +61,7 @@ Start with `python -m triage_desk doctor --check-sign-in` (from `app`) and `pyth
 | An extra resource group `rg-<env>-foundry` with a Premium registry appeared | `azd provision` created a registry because none was selected | Delete it during cleanup. In a workshop, never run `azd provision`: use the registry values in your handout `<your-id>.module7.txt`. |
 | `ERROR: ... AuthorizationFailed ... Microsoft.Resources/deployments/whatIf/action` from `azd provision` (workshop) | `azd provision` needs a subscription-level deployment; students don't have it | Skip `azd provision`. Run the `azd env set` lines from your handout, then `azd deploy`. |
 | `AzureDeveloperCLICredential: executable not found on path` | `azd` was installed in this window and isn't on the PATH yet | Open a new PowerShell window, or add the `azd` folder to the PATH for this window. |
-| `azd ai agent invoke` returns `Operation returned an invalid status 'Forbidden'` | The hosted agent's identity has no search roles yet, or they haven't taken effect | Send your instructor the principal ID (7.6). After the roles are assigned wait about five minutes, then try again. |
-| Hosted agent answers but never returns `Known issue: KI-2041` | The knowledge base is searched with the words in your message, and `Triage issue ISS-1001` has none | Send the full ticket text, as in 7.8. |
+| Hosted invocation attempted after deployment | Module 7 is deployment-only; hosted runtime permissions are not configured by this exercise | Stop after successful deployment and active status in 7.6. Use the Prompt Agent `issue-triage-agent` for Module 8 tests and traces and Module 9 portal evaluation. |
 
 ## Azure Storage and Foundry IQ
 | Symptom | Cause | Fix |
@@ -78,6 +77,7 @@ Start with `python -m triage_desk doctor --check-sign-in` (from `app`) and `pyth
 | No traces | Application Insights not connected, or ingestion delay | **Agents** > **Traces** > **Connect**; wait a few minutes. |
 | Guardrail doesn't block anything | Assigned to the model, not the agent, or uses risks not supported for agents | Assign it to the agent; review the risk table in the guardrails overview. |
 | Evaluation **Failed** / **Partial** | Judge model missing/quota, or field mapping | Pick a judge deployment with quota; map `query`. |
+| Evaluation fails in seconds with `probability_threshold is only supported for Decision models` | Incompatible evaluator initialization; observed with ToolUseQuality and OutputQuality using `gpt-5-mini` and `probability_threshold: 0.5` | Restart at [Module 9.5](student/module-09-evaluation.md#95-create-the-portal-evaluation), create a new evaluation with only Relevance initially, and reuse the existing dataset. Remove the two affected evaluators; leave Probability threshold unset if exposed. Verify scores before expanding criteria. Do not add Azure roles or rerun the unchanged definition. |
 
 ## Getting help
 Collect: the command, the output with `--verbose` (remove any tokens or IDs), `python scripts/lab_state.py status`, and `python -m triage_desk doctor`. Never share `app/.env` or `app/.env.container`.

@@ -1,6 +1,6 @@
 # Student guide - Contoso Telecom Issue Triage Assistant
 
-In this lab you build one application, the **Issue Triage Assistant** for the fictional operator Contoso Telecom, and extend it step by step. You end up with an AI agent that runs locally, in a container, and as a Microsoft Foundry hosted agent. It is grounded in company knowledge, governed with guardrails, monitored, and evaluated.
+In this lab you build one application, the **Issue Triage Assistant** for the fictional operator Contoso Telecom, and extend it step by step. You run the code-defined agent locally and in a container, then deploy it as a Microsoft Foundry hosted agent without invoking or testing the hosted deployment. You use the portal Prompt Agent `issue-triage-agent` for guardrail tests, tracing, monitoring, and portal evaluation.
 
 All data is synthetic. Contoso Telecom, its customers, areas, and incidents are fictional.
 
@@ -46,8 +46,8 @@ If your instructor gave you an account and a **handout**, this is your path. Eve
 | 4 | Create **your** knowledge source and knowledge base on the shared search service (**File upload**), connect it to your agent | Search service, roles, embedding model. **Skip** creating a search service or storage account |
 | 5 | Put your search endpoint and knowledge base name in `app/.env`, enable step 5.1, run the tests | Search roles |
 | 6 | Build and run the container (needs Docker) | - |
-| 7 | Run the commands in your handout `<your-id>.module7.txt` (`azd ai agent init`, `azd env set` for the shared registry), then `azd deploy` and invoke your agent | Registry and its access. **Skip** `azd provision` (you can't run it) and never create a new registry. **Don't** run the role script: send your agent's principal ID to the instructor |
-| 8 | Assign the instructor's guardrail to your agent, test it, connect the shared Application Insights, read traces | Guardrail, Application Insights. **Skip** creating a guardrail or Application Insights |
+| 7 | Run your handout `<your-id>.module7.txt` commands, deploy with `azd deploy`, then verify active status with `azd ai agent show`. That completes the exercise | Registry and its access. **Skip** `azd provision`, creating a registry, hosted-agent role assignments, invocation, tests, and tracing. No principal-ID handoff |
+| 8 | Assign the instructor's guardrail to your **Prompt Agent** `issue-triage-agent`, test it, and read its traces | Instructor creates the guardrail and completes the shared Application Insights connection for your project. **Skip** resource creation, role assignment, and hosted-agent tests/tracing |
 | 9 | Upload your dataset, run the evaluation, change the instructions, compare | Judge model: use the one your instructor names |
 
 **Three rules for a shared workshop**
@@ -119,4 +119,4 @@ Keep a private note (not in the repository) with the values you collect:
 | Search service endpoint | Module 4 (or your handout) | Modules 5, 7 |
 | Knowledge base name | Module 4 (or your handout, for example `kbtriage-s01`) | Modules 5, 7 |
 | Project resource ID | Module 7 | Module 7 |
-| Hosted agent name | Module 7 | Modules 8, 9 |
+| Hosted agent name | Module 7 | Module 7 deployment verification and cleanup only |

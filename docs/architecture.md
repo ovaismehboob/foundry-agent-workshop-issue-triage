@@ -79,7 +79,7 @@ flowchart LR
 | Azure Container Registry | Required | Module 7 | Stores the agent image (created or selected by `azd`) |
 | Hosted agent `issue-triage-hosted` | Required | Module 7 | Same agent running in Foundry Agent Service |
 | Guardrail `grissuetriage` | Required | Module 8 | Content safety and prompt-attack controls (agent guardrails preview) |
-| Application Insights + Log Analytics | Required | Module 8 | Traces, monitoring dashboard, hosted agent telemetry (tracing preview) |
+| Application Insights + Log Analytics | Required | Module 8 | Prompt Agent traces and monitoring dashboard (tracing preview); no hosted-agent tests |
 | Evaluation dataset + portal evaluation + judge model | Required | Module 9 | Quality and safety evaluation |
 | Microsoft Defender integration | **Optional** | Module 8 (discussion) | AI threat protection; separate enablement and licensing |
 | Microsoft Purview integration | **Optional** | Module 8 (discussion) | Data security and compliance for AI interactions; separate enablement and licensing |
@@ -102,7 +102,7 @@ In hosted mode, `main.py` wraps the same agent in `ResponsesHostServer`. The Fou
 |---|---|---|---|
 | CLI on a student machine | Student's Microsoft Entra user (`az login`) | `DefaultAzureCredential` | Foundry User on the project; Search Index Data Reader on the search service (Module 5) |
 | Local container (Module 6 only) | Student's user, via short-lived tokens | `LocalDevTokenCredential` (only when `LAB_DEV_TOKEN_*` is set) | Same as the CLI |
-| Hosted agent | Platform-created agent identity | `DefaultAzureCredential` (managed by the platform) | Model access by default; Search Index Data Reader assigned in Module 7.7 |
+| Hosted agent | Platform-created agent identity | `DefaultAzureCredential` (managed by the platform) | Model access by default; deployment-only in Module 7, with no hosted Search query or runtime test |
 | Portal Prompt Agent to the knowledge base | Project connection (key in the official lab flow; managed identity recommended) | n/a | See Module 4.4 |
 | Search service to Blob Storage | Knowledge source authentication (key or managed identity) | n/a | See Module 4.3 |
 

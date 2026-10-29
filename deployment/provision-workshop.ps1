@@ -18,7 +18,8 @@
                   Log Analytics Reader on Application Insights and the workspace.
     Search MI   : Cognitive Services User on the Foundry resource (knowledge bases call the models).
     Project MIs : Search Index Data Reader/Contributor + Search Service Contributor on the search service,
-                  AcrPull on the registry (hosted agents pull their image).
+                  AcrPull on the registry (hosted agents pull their image),
+                  Monitoring Metrics Publisher on Application Insights.
   It also creates, in each student's project, the project connection to the shared search service (the one the portal's
   "Connect" button on Build > Knowledge would create; students can't use that button without Foundry Owner on the whole
   Foundry resource). Existing connections are left alone.
@@ -31,8 +32,9 @@
     - Roles on a shared search service are service-wide. Unique names (kbtriage-<id>) prevent accidents, they
       are not an access boundary. Tell students to touch only their own objects.
     - The Application Insights / Log Analytics access is workspace-wide: students can see each other's traces.
-    - Hosted-agent identities exist only after deployment. Grant them search access afterwards with
-      deployment/assign-hosted-agent-roles.ps1.
+    - Module 7 ends after hosted deployment verification; no hosted-agent search access or runtime tests are required.
+    - The instructor connects Application Insights for each project from the Prompt Agent's Traces tab.
+      Students test and trace the Prompt Agent, not the hosted agent.
     - The guardrail is created once by the instructor in the portal (Build > Guardrails).
 
   Requires: Azure CLI signed in (az login) as Owner (or User Access Administrator + Contributor) on the
@@ -101,6 +103,7 @@ $Role = @{
     AcrRepoReader        = @{ Id = 'b93aa761-3e63-49ed-ac28-beffa264f7ac'; Name = 'Container Registry Repository Reader' }
     AcrTasksContrib      = @{ Id = 'fb382eab-e894-4461-af04-94435c366c3f'; Name = 'Container Registry Tasks Contributor' }
     LogAnalyticsReader   = @{ Id = '73c42c96-874c-492b-b04d-ab87d138a893'; Name = 'Log Analytics Reader' }
+    MetricsPublisher     = @{ Id = '3913510d-42f4-4e42-8a64-420c390055eb'; Name = 'Monitoring Metrics Publisher' }
 }
 $WorkshopTag = 'workshop=foundry-agent-lab'
 $Summary = @{ Assigned = 0; Skipped = 0; WouldAssign = 0 }
@@ -448,12 +451,15 @@ foreach ($student in $students) {
         $seenProjects[$projectName] = $true
         Ensure-SearchConnection -ProjectName $projectName
         $projectPrincipal = $student.Project.PrincipalId
-        if (-not $projectPrincipal) { Write-Warning "Project '$projectName' has no system-assigned identity; skipping its search and registry roles."; continue }
+        if (-not $projectPrincipal) { Write-Warning "Project '$projectName' has no system-assigned identity; skipping its search, registry and monitoring roles."; continue }
         $projectWho = "project '$projectName' (managed identity)"
         foreach ($searchRole in $Role.SearchDataReader, $Role.SearchDataContrib, $Role.SearchServiceContrib) {
             Grant-Role -PrincipalId $projectPrincipal -PrincipalType ServicePrincipal -RoleDef $searchRole -Scope $searchId -Who $projectWho -Where "search service '$SearchServiceName'"
         }
         if ($acrId) { Grant-Role -PrincipalId $projectPrincipal -PrincipalType ServicePrincipal -RoleDef $acrPullRole -Scope $acrId -Who $projectWho -Where "registry '$AcrName'" }
+        if ($appInsightsId) {
+            Grant-Role -PrincipalId $projectPrincipal -PrincipalType ServicePrincipal -RoleDef $Role.MetricsPublisher -Scope $appInsightsId -Who $projectWho -Where "Application Insights '$AppInsightsName'"
+        }
     }
 }
 
@@ -516,7 +522,11 @@ if ($DryRun) {
                 "azd env set AZURE_SEARCH_KNOWLEDGE_BASE_NAME $($student.KnowledgeBase) -e triage-lab",
                 "",
                 "# 7.5",
-                "azd deploy -e triage-lab"
+                "azd deploy -e triage-lab",
+                "",
+                "# 7.6: verify active deployment. This completes Module 7; do not invoke or test the hosted agent.",
+                "azd ai agent show issue-triage-hosted -e triage-lab --output json",
+                "# Continue with the Prompt Agent issue-triage-agent for Module 8 tests and traces."
             ) -join "`r`n"
             [System.IO.File]::WriteAllText((Join-Path $OutputDir "$($student.StudentId).module7.txt"), $module7 + "`r`n")
         }
@@ -533,7 +543,8 @@ Write-Host @"
 Next steps for the instructor:
   1. Pilot with ONE student account end to end (Modules 4, 5, 7, 8) before the class. Role assignments can take a few minutes.
   2. Create the guardrail once (Foundry portal > Build > Guardrails) and have students assign it to their agent in Module 8.
-  3. After each student deploys a hosted agent (Module 7), grant its identity access to search:
-       ./deployment/assign-hosted-agent-roles.ps1 -AgentPrincipalId <id> -SearchServiceName $SearchServiceName -ResourceGroup $ResourceGroup
+  3. Module 7 ends after deploy + active status verification; do not invoke or test hosted agents.
+     For Module 8, connect shared Application Insights for each project as the instructor from
+     issue-triage-agent > Traces > Connect using Project Managed Identity. Students test and trace only that Prompt Agent.
   4. After the workshop run ./deployment/remove-workshop-infra.ps1 to delete what this script created.
 "@

@@ -7,6 +7,7 @@ Evaluate the triage agent with a small, human-readable synthetic dataset: review
 > - In 9.5, select `gpt-5-mini` as the **Judge model**; it is already deployed. Don't deploy models yourself.
 > - Evaluations can take a long time and use shared model capacity. Start yours when your instructor says, then continue with 9.6 locally while it runs.
 > - In 9.3, 9.7 and 9.8, set `PROMPT_AGENT_VERSION` in `app/.env` to **your own** agent's version.
+> - If a previous run failed within seconds with `probability_threshold is only supported for Decision models`, resume at **9.5** and create a **new evaluation** with only **Relevance** initially. Reuse the uploaded dataset and current Prompt Agent version; do not repeat 9.1 to 9.4 or use **Add run** on the unchanged failing configuration.
 
 ## Prerequisites
 - Modules 1, 3, and 4 completed. `issue-triage-agent` has the knowledge base connected.
@@ -17,7 +18,7 @@ Evaluate the triage agent with a small, human-readable synthetic dataset: review
 | Option | Used here | Notes |
 |---|---|---|
 | **Agent** target, **Individual turns**, **Existing dataset** | Yes | The portal sends each `query` to `issue-triage-agent` (the Prompt Agent) and scores the live responses. |
-| Hosted agent | Optional | The **Agent** target also supports hosted agents (`issue-triage-hosted`). |
+| Hosted agent | No | Module 7 is deployment-only. Do not select `issue-triage-hosted` for evaluations; use the Prompt Agent `issue-triage-agent`. |
 | Dataset target (saved responses) | No | Evaluates outputs you generated earlier, without calling the agent. |
 | Local scorer | Yes | Runs the local engines and checks the exact business labels. |
 
@@ -61,14 +62,15 @@ This uses the documented SDK method `project.datasets.upload_file(...)` and crea
    3. **Frequency**: **One time** (**Recurring** is preview). Select **Next**.
    4. **Data**: **Existing dataset**, then select `issue-triage-eval` version 1. (Other options: **Synthetic generation**, **Benchmarks**, **Existing traces**.) Select **Next**.
    5. **Configure agents**: select **Configure** to view the user prompt. Keep `{{item.query}}`. Select **Next**.
-   6. **Criteria**: the portal selects a **Judge model** (for example `gpt-5-mini`; you can choose `gpt-4.1-mini`) and auto-suggests evaluators, in the validated run 22 of them:
-      - **Agents**: ToolSelection, ToolOutputUtilization, ToolInputAccuracy, ToolCallSuccess, ToolCallAccuracy, IntentResolution, ToolUseQuality, TaskCompletion, TaskAdherence, CustomerSatisfaction
-      - **Quality**: Relevance, OutputQuality, Groundedness, Fluency, Coherence
-      - **Safety**: Violence, Sexual, SelfHarm, ProtectedMaterial, IndirectAttack, HateAndUnfairness, CodeVulnerability
+   6. **Criteria**: select the existing **Judge model** `gpt-5-mini`. For the first smoke test, remove the auto-suggested evaluators and select only **Relevance**. In particular, do not keep **ToolUseQuality** or **OutputQuality** in this initial run.
 
-      The fields are mapped automatically: `query: {{item.query}}`, `response: {{sample.output_text}}`, `ground_truth: {{item.ground_truth}}`, `tool_calls`, and `tool_definitions`. To save time and tokens, you can remove evaluators that don't apply; keep at least IntentResolution, TaskAdherence, TaskCompletion, Relevance, Groundedness, and the safety evaluators.
-   7. **Review**: enter **Evaluation name** `triage-eval-v<agent version>` and select **Submit**.
+      Check the mappings: `query: {{item.query}}` and `response: {{sample.output_text}}`. Evaluators that need a reference answer use `ground_truth: {{item.ground_truth}}`.
+
+      **Known configuration failure (observed 29 October 2026):** the portal configured ToolUseQuality and OutputQuality with `deployment_name: gpt-5-mini` and `probability_threshold: 0.5`. Runs failed before processing any rows with `probability_threshold is only supported for Decision models`. If **Probability threshold** is exposed for this judge, leave it unset; this is not the normal score/pass threshold. If the portal inserts it automatically, use the Relevance-only workaround. An instructor using the API/SDK can instead create corrected evaluator definitions without `probability_threshold`; do not grant broader Azure roles to address this configuration error.
+   7. **Review**: enter **Evaluation name** `triage-eval-v<agent version>-relevance` and select **Submit**. Use a new name when recovering from a failed evaluation.
 3. The evaluation page shows the run with **Status** **In progress**, and buttons **Make recurring**, **Add run**, and **Compare runs**. With many evaluators, a run can take a long time (more than 30 minutes in validation); continue with 9.6 locally while you wait.
+
+Confirm that the smoke test produces dataset rows and Relevance scores before adding evaluators. The configuration error above is confirmed, but a successful Relevance-only rerun was not yet verified when this workaround was documented. After the smoke test succeeds, create an evaluation with the applicable criteria (for example Relevance, IntentResolution, TaskAdherence, TaskCompletion, Groundedness, and safety evaluators), checking each configuration. Use the same criteria, judge model, mappings, and dataset for the before/after comparison in 9.8 and 9.9. A new evaluator set should have its own evaluation definition; **Add run** on the original failed definition repeats its invalid settings.
 
 > **SCREENSHOT PLACEHOLDER** - `docs/images/m09-evaluation-results.png`
 > - **Screen**: evaluation run results with per-evaluator scores and per-row results.
@@ -115,6 +117,7 @@ Validated local baseline for the Prompt Agent (version 5, with knowledge base an
 | Symptom | Likely cause | Recovery |
 |---|---|---|
 | Dataset not listed | Upload went to a different project | Check `FOUNDRY_PROJECT_ENDPOINT`; run the upload again with `--version 2`. |
+| Fails within seconds with `probability_threshold is only supported for Decision models`, with no dataset rows or scores | An evaluator has an incompatible initialization parameter; observed with ToolUseQuality and OutputQuality using `gpt-5-mini` and `probability_threshold: 0.5` | Resume at 9.5, create a new evaluation, and start with Relevance only. Remove ToolUseQuality and OutputQuality; leave Probability threshold unset if exposed. Do not retry the unchanged evaluation or add Azure roles. |
 | Status **Failed** or **Partial** | Judge model missing or out of quota, or a required field unassigned | Select a judge deployment with quota; check the field mapping. |
 | Evaluation is slow | Many evaluators, judge model quota | Remove evaluators you don't need in **Criteria**; use a judge model with quota; use `--limit` for the local scorer. |
 | Local scorer shows fallbacks | AI call failed (see Exercise 3.5) | Run one case with `python -m triage_desk triage ISS-1001 --engine prompt-agent --verbose`. |
